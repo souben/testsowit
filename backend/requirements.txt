@@ -1,0 +1,6 @@
+Django==3.2.3
+djangorestframework==3.12.3
+djangorestframework-gis==0.17
+psycopg2
+django-cors-headers==3.2.1
+

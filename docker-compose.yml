@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  postgis:
+    image: kartoza/postgis:13.0
+    environment:
+        - POSTGRES_DB=plot_db
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=passpostgre
+    command:
+      sh -c "echo \"host all all 0.0.0.0/0 md5\" >> /etc/postgresql/13/main/pg_hba.conf && /start-postgis.sh"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h postgis -d postgres"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+    
+  dj:
+    container_name: dj
+    build: backend
+    command: 
+      bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:80"
+    volumes: 
+      - ./backend:/app
+    ports:
+      - "80:80"
+    restart: on-failure
+    depends_on: 
+      postgis:
+        condition: service_healthy
+
+  # ng:
+  #   container_name: ng
+  #   build: frontend-client
+  #   ports:
+  #     - "8080:80"
